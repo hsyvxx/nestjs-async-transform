@@ -1,4 +1,18 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "src",
+  "projects": {
+    "nestjs-async-transform": {
+      "type": "library",
+      "root": "libs/nestjs-async-transform",
+      "entryFile": "index",
+      "sourceRoot": "libs/nestjs-async-transform/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/nestjs-async-transform/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
 }
