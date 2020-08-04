@@ -2,8 +2,8 @@ import { ASYNC_TRANSFORM_METADATA } from './constants';
 import { Expose, ExposeOptions } from 'class-transformer';
 import { AsyncTransformOption } from './async-transform-option';
 
-type AsyncTransformType = <T = unknown, R = unknown>(
-  option: AsyncTransformOption<T, R> & { exposeOptions?: ExposeOptions },
+type AsyncTransformType = <T = unknown, R = unknown, E extends Error = Error>(
+  option: AsyncTransformOption<T, R, E> & { exposeOptions?: ExposeOptions },
 ) => PropertyDecorator;
 
 export const AsyncTransform: AsyncTransformType = option => (target, propertyKey) => {

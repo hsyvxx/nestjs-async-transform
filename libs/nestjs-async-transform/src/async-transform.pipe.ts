@@ -35,7 +35,7 @@ export class AsyncTransformPipe implements PipeTransform {
       try {
         dto[v.propertyName] = await v.transform(dto, ...injectData);
       } catch (err) {
-        throw v.exception(err);
+        throw v.exception ? v.exception(err) : err;
       }
     });
     await Promise.all(transformProcess);
