@@ -1,6 +1,6 @@
 {
   "name": "nestjs-async-transform",
-  "version": "0.0.1",
+  "version": "7.0.0",
   "description": "",
   "author": "",
   "main": "dist/libs/nestjs-async-transform/index.js",
