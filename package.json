@@ -3,6 +3,11 @@
   "version": "0.0.1",
   "description": "",
   "author": "",
+  "main": "dist/libs/nestjs-async-transform/index.js",
+  "files": [
+    "dist/libs/nestjs-async-transform",
+    "README.md"
+  ],
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
