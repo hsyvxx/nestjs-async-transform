@@ -4,7 +4,7 @@ import { AsyncTransformOption } from './async-transform-option';
 
 type AsyncTransformType = <T = unknown, R = unknown>(
   option: AsyncTransformOption<T, R> & { exposeOptions?: ExposeOptions },
-) => PropertyDecorator | ClassDecorator;
+) => PropertyDecorator;
 
 export const AsyncTransform: AsyncTransformType = option => (target, propertyKey) => {
   Expose(option.exposeOptions)(target, propertyKey as string);
