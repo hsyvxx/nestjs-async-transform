@@ -1,2 +1,2 @@
-export * from './nestjs-async-transform.module';
-export * from './nestjs-async-transform.service';
+export { AsyncTransformOption } from './async-transform-option';
+export { AsyncTransform } from './async-transform.decorator';
