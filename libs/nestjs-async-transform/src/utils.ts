@@ -57,8 +57,8 @@ export const topoSort = <T>(objects: T[], process: TopoProcess<T>): T[] | undefi
     });
   }
 
-  const edges = nodes.flatMap(n => [...n.inputs, ...n.outputs]);
-  if (edges) return undefined;
+  const edges = nodes.flatMap(n => [...n.inputs, ...n.outputs]).filter(d => d);
+  if (!edges.length) return undefined;
 
   return sortedNodes.map(n => n.value);
 };
