@@ -1,17 +1,6 @@
 import { Type } from '@nestjs/common';
 
-export const types: Type<unknown>[] = [String, Boolean, Number, Array, Object, Function];
-
-type Modifier = 'readonly' | 'optional' | 'none';
-type Replace<O extends Record<string, unknown>, K extends keyof O, T, M extends Modifier = 'none'> = Omit<O, K> &
-  (M extends 'readonly'
-    ? M extends 'optional'
-      ? { readonly [P in K]?: T }
-      : { readonly [P in K]: T }
-    : M extends 'optional'
-    ? { [P in K]?: T }
-    : { [P in K]: T });
-type PartProp<O extends Record<string, unknown>, K extends keyof O> = Omit<O, K> & { [P in K]+?: O[P] };
+export const types: Type<unknown>[] = [String, Boolean, Number, Array, Object];
 
 type Node<T> = {
   key: string;
@@ -21,44 +10,45 @@ type Node<T> = {
 };
 
 type TopoProcess<T> = {
-  findKey: (node: T) => string | undefined;
-  findInputs: (node: T) => Array<string | undefined>;
+  findKey: (node: T) => string;
+  findInputs: (node: T) => string[];
 };
 
 export const topoSort = <T>(objects: T[], process: TopoProcess<T>): T[] | undefined => {
-  type PartKey = PartProp<Node<T>, 'key'>;
-  type NullableInput = Replace<Node<T>, 'inputs', Array<string | undefined>>;
+  const nodes = objects.map<Node<T>>(object => ({
+    key: process.findKey(object),
+    value: object,
+    inputs: [...process.findInputs(object)],
+    outputs: [],
+  }));
 
-  const nodes = objects
-    .map<PartKey>(object => ({ key: process.findKey(object), value: object, inputs: [], outputs: [] }))
-    .filter((n): n is Node<T> => n.key !== undefined)
-    .map<NullableInput>(n => ({ ...n, inputs: process.findInputs(n.value) }))
-    .map(n => ({ ...n, inputs: n.inputs.filter((n): n is string => n !== undefined) }))
-    .map<Node<T>>((n, _i, arr) => {
-      n.inputs.forEach(input => arr.find(a => a.key === input)?.outputs.push(n.key));
-      return n as Node<T>;
+  nodes.forEach(node => {
+    node.inputs = node.inputs.filter(input => {
+      return nodes.find(node => node.key === input) !== undefined;
     });
+    node.inputs.forEach(input => {
+      nodes.find(a => a.key === input).outputs.push(node.key);
+    });
+  });
 
   const roots = nodes.filter(n => !n.inputs.length);
   const sortedNodes = Array.from<Node<T>>([]);
 
   while (roots.length) {
-    const node = roots.pop()!;
-    sortedNodes.push(node);
+    const root = roots.pop();
+    sortedNodes.push(root);
 
-    node.outputs.forEach((e, i, arr) => {
-      const m = nodes.find(n => n.key === e)!;
-
-      arr[i] = undefined!;
-      const inputIdx = m.inputs.findIndex(input => input === e);
-      m.inputs[inputIdx] = undefined!;
-
-      if (!m.inputs.length) roots.push(m);
-    });
+    while (root.outputs.length) {
+      const output = root.outputs.pop();
+      const node = nodes.find(n => n.key === output);
+      const inputIdx = node.inputs.findIndex(input => input === root.key);
+      node.inputs.splice(inputIdx, 1);
+      if (!node.inputs.length) roots.push(node);
+    }
   }
 
   const edges = nodes.flatMap(n => [...n.inputs, ...n.outputs]).filter(d => d);
-  if (!edges.length) return undefined;
+  if (edges.length) return undefined;
 
   return sortedNodes.map(n => n.value);
 };

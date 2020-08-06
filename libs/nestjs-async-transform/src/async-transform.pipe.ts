@@ -1,44 +1,51 @@
-import { ArgumentMetadata, Injectable, PipeTransform, InternalServerErrorException } from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform, InternalServerErrorException, Type } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { ASYNC_TRANSFORM_METADATA, MESSAGES } from './constants';
+import { ASYNC_TRANSFORM_METADATA, MESSAGES, ASYNC_TRANSFORM_NESTED } from './constants';
 import { plainToClass } from 'class-transformer';
 import { types, topoSort } from './utils';
 import { AsyncTransformOption } from './async-transform-option';
+
+type ProcessOption = AsyncTransformOption & { propertyName: string; type?: Type<unknown>; value: unknown };
 
 @Injectable()
 export class AsyncTransformPipe implements PipeTransform {
   constructor(private moduleRef: ModuleRef) {}
 
-  async transform(value: unknown, { metatype }: ArgumentMetadata): Promise<unknown> {
+  async transform(value: unknown, { metatype, type }: ArgumentMetadata): Promise<unknown> {
     if (!metatype || types.includes(metatype)) return value;
     const dto = plainToClass(metatype, value) as Record<string, unknown>;
 
     const propertyNames = Object.getOwnPropertyNames(dto);
-    const nodeNames = propertyNames.filter(n => Reflect.hasMetadata(ASYNC_TRANSFORM_METADATA, dto, n));
-    const options = nodeNames.map(n => {
-      const option = Reflect.getMetadata(ASYNC_TRANSFORM_METADATA, dto, n) as AsyncTransformOption & {
-        propertyName: string;
-      };
-      option.propertyName = n;
-      return option;
-    });
+    const targetNames = propertyNames.filter(n => Reflect.hasMetadata(ASYNC_TRANSFORM_METADATA, dto, n));
+    const namedOptions = targetNames.map<ProcessOption>(n => ({
+      ...(Reflect.getMetadata(ASYNC_TRANSFORM_METADATA, dto, n) as AsyncTransformOption),
+      propertyName: n,
+      type: Reflect.getMetadata(ASYNC_TRANSFORM_NESTED, dto, n),
+      value: dto[n],
+    }));
 
-    const sortedOptions = topoSort(options, {
+    const sortedOptions = topoSort(namedOptions, {
       findKey: o => o.propertyName,
       findInputs: n => (n.depend ? n.depend : []),
     });
     if (!sortedOptions) throw new InternalServerErrorException(MESSAGES.m001);
 
-    // transform process
-    const transformProcess = sortedOptions.map(async v => {
-      const injectData = v.inject.map(i => this.moduleRef.get(i));
+    const transformProcesses = sortedOptions.map(async option => {
+      const injectData = option.inject.map(i => this.moduleRef.get(i, { strict: false }));
       try {
-        dto[v.propertyName] = await v.transform(dto, ...injectData);
+        dto[option.propertyName] = await option.transform(dto, ...injectData);
       } catch (err) {
-        throw v.exception ? v.exception(err) : err;
+        throw option.exception ? option.exception(err) : err;
       }
     });
-    await Promise.all(transformProcess);
+    await Promise.all(transformProcesses);
+
+    const recursive = sortedOptions
+      .filter(o => o.type)
+      .map(async o => {
+        dto[o.propertyName] = await this.transform(dto[o.propertyName], { metatype: o.type, type });
+      });
+    await Promise.all(recursive);
 
     return dto;
   }

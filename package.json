@@ -1,29 +1,28 @@
 {
   "name": "nestjs-async-transform",
-  "version": "7.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "The way to connect dto to nestjs di system.",
   "author": "",
   "main": "dist/libs/nestjs-async-transform/index.js",
   "files": [
-    "dist/libs/nestjs-async-transform",
-    "README.md"
+    "dist/libs/nestjs-async-transform"
   ],
-  "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
+    "format": "prettier --write \"example/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{example,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prepublishOnly": "nest build nestjs-async-transform"
   },
   "peerDependencies": {
     "@nestjs/common": "^7.0.0",
@@ -35,7 +34,11 @@
     "rxjs": "^6.5.4"
   },
   "devDependencies": {
+    "@helvetia/random-names": "^1.0.6",
     "@nestjs/cli": "^7.0.0",
+    "@nestjs/common": "^7.4.2",
+    "@nestjs/core": "^7.4.2",
+    "@nestjs/jwt": "^7.1.0",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.0",
@@ -50,6 +53,7 @@
     "eslint-plugin-import": "^2.20.1",
     "jest": "26.0.1",
     "prettier": "^1.19.1",
+    "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "supertest": "^4.0.2",
     "ts-jest": "26.1.0",
@@ -72,7 +76,7 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/src/",
+      "<rootDir>/example/",
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {

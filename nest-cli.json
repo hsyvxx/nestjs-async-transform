@@ -1,6 +1,6 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "example",
   "projects": {
     "nestjs-async-transform": {
       "type": "library",

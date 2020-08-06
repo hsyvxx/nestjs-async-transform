@@ -15,6 +15,6 @@
       "@app/nestjs-async-transform": ["libs/nestjs-async-transform/src"],
       "@app/nestjs-async-transform/*": ["libs/nestjs-async-transform/src/*"]
     },
-    "lib": ["ES2020"]
+    "lib": ["ESNext"]
   }
 }
