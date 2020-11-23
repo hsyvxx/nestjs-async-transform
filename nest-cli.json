@@ -4,11 +4,11 @@
   "projects": {
     "nestjs-async-transform": {
       "type": "library",
-      "root": "libs/nestjs-async-transform",
+      "root": "lib",
       "entryFile": "index",
-      "sourceRoot": "libs/nestjs-async-transform/src",
+      "sourceRoot": "lib",
       "compilerOptions": {
-        "tsConfigPath": "libs/nestjs-async-transform/tsconfig.lib.json"
+        "tsConfigPath": "./tsconfig.lib.json"
       }
     }
   },
