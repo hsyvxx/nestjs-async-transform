@@ -43,7 +43,10 @@ describe('topoSort', () => {
     const f = { key: '6', depends: [] };
     const g = { key: '7', depends: ['2'] };
 
-    const sorted = topoSort([a, b, c, d, e, f, g], { findKey: n => n.key, findInputs: n => n.depends });
+    const sorted = topoSort([a, b, c, d, e, f, g], {
+      findKey: n => n.key,
+      findInputs: n => n.depends,
+    });
     const idxA = sorted.findIndex(n => n.key === a.key);
     const idxB = sorted.findIndex(n => n.key === b.key);
     const idxC = sorted.findIndex(n => n.key === c.key);
