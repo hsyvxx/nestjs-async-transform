@@ -1,6 +1,6 @@
 {
   "name": "nestjs-async-transform",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The way to connect dto to nestjs di system.",
   "author": "",
   "main": "dist/index.js",
