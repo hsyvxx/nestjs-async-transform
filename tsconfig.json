@@ -12,8 +12,8 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@app/nestjs-async-transform": ["libs/nestjs-async-transform/src"],
-      "@app/nestjs-async-transform/*": ["libs/nestjs-async-transform/src/*"]
+      "@app/nestjs-async-transform": ["lib"],
+      "@app/nestjs-async-transform/*": ["lib/*"]
     },
     "lib": ["ESNext"]
   }

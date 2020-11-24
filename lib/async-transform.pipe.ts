@@ -1,17 +1,17 @@
-import { ArgumentMetadata, Injectable, PipeTransform, InternalServerErrorException, Type } from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform, InternalServerErrorException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { ASYNC_TRANSFORM_METADATA, MESSAGES, ASYNC_TRANSFORM_NESTED } from './constants';
+import { ASYNC_TRANSFORM_METADATA, MESSAGES } from './constants';
 import { plainToClass } from 'class-transformer';
 import { types, topoSort } from './utils';
 import { AsyncTransformOption } from './async-transform-option';
 
-type ProcessOption = AsyncTransformOption & { propertyName: string; type?: Type<unknown>; value: unknown };
+type ProcessOption = AsyncTransformOption & { propertyName: string };
 
 @Injectable()
 export class AsyncTransformPipe implements PipeTransform {
   constructor(private moduleRef: ModuleRef) {}
 
-  async transform(value: unknown, { metatype, type }: ArgumentMetadata): Promise<unknown> {
+  async transform(value: unknown, { metatype }: ArgumentMetadata): Promise<unknown> {
     if (!metatype || types.includes(metatype)) return value;
     const dto = plainToClass(metatype, value) as Record<string, unknown>;
 
@@ -20,8 +20,6 @@ export class AsyncTransformPipe implements PipeTransform {
     const namedOptions = targetNames.map<ProcessOption>(n => ({
       ...(Reflect.getMetadata(ASYNC_TRANSFORM_METADATA, dto, n) as AsyncTransformOption),
       propertyName: n,
-      type: Reflect.getMetadata(ASYNC_TRANSFORM_NESTED, dto, n),
-      value: dto[n],
     }));
 
     const sortedOptions = topoSort(namedOptions, {
@@ -39,13 +37,6 @@ export class AsyncTransformPipe implements PipeTransform {
       }
     });
     await Promise.all(transformProcesses);
-
-    const recursive = sortedOptions
-      .filter(o => o.type)
-      .map(async o => {
-        dto[o.propertyName] = await this.transform(dto[o.propertyName], { metatype: o.type, type });
-      });
-    await Promise.all(recursive);
 
     return dto;
   }
